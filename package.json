@@ -1,0 +1,28 @@
+{
+  "name": "Tabless-Thursday-Backend",
+  "version": "1.0.0",
+  "description": "People often have a million tabs up and lose track of what they were doing. This website lets you organize them in to-do lists and make a note of why it was important. Makes it easy to pick up where you left off.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jm020801/Tabless-Thursday-Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jm020801/Tabless-Thursday-Backend/issues"
+  },
+  "homepage": "https://github.com/jm020801/Tabless-Thursday-Backend#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.4.0",
+    "knex": "^0.16.3",
+    "nodemon": "^1.18.9",
+    "sqlite3": "^4.0.6"
+  }
+}
