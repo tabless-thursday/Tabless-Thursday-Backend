@@ -114,24 +114,24 @@ server.get("/users", lock, async (req, res) => {
 
 
 // get all tabs
-router.get("/tabs", (req, res) => {
-  projectDB
+server.get("/tabs", (req, res) => {
+    db("tabs")
     .get()
-    .then(projects => {
-      res.status(200).json(projects);
+    .then(tabs => {
+      res.status(200).json(tabs);
     })
     .catch(err => {
       res
         .status(500)
-        .json({ error: "projects retrival could not be performed " });
+        .json({ error: "tabs retrival could not be performed " });
     });
 });
 
 
-router.post("/tabs", (req, res) => {
+server.post("/tabs", (req, res) => {
   const post = req.body;
 
-    projectDB
+    db("tabs")
       .insert(post)
       .then(result => {
         res.status(201).json(result);
@@ -142,33 +142,33 @@ router.post("/tabs", (req, res) => {
           .json(err)
           // ({
           //   error:
-          //     "Could not add new project. Provide projectID, notes, description and try again."
+          //     "Could not add new tab."
           // });
       });
     });
 
 
 
-router.delete("/tabs/:id", (req, res) => {
+server.delete("/tabs/:id", (req, res) => {
   const id = req.params.id;
 
   if (id) {
-    projectDB
+    db("tabs")
       .remove(id)
       .then(result => {
         if (result !== 0) {
           res.status(200).json({ result });
         } else {
-          res.status(404).json({ error: "project ID does not exist" });
+          res.status(404).json({ error: "tab ID does not exist" });
         }
       })
       .catch(err => {
         res
           .status(500)
-          .json({ error: "Deleting project could not be performed, try again" });
+          .json({ error: "Deleting tab could not be performed, try again" });
       });
   } else {
-    res.status(404).json({ error: "Provide project ID for removal" });
+    res.status(404).json({ error: "Provide tab ID for removal" });
   }
 });
 
