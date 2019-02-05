@@ -99,29 +99,29 @@ function checkRole(role) {
 }
 
 // protect this endpoint so only logged in users can see it
-server.get("/users", lock, checkRole("admin"), async (req, res) => {
-  const users = await db("users").select("id", "username", "name");
+// server.get("/users", lock, checkRole("admin"), async (req, res) => {
+//   const users = await db("users").select("id", "username", "name");
 
-  res.status(200).json({
-    users,
-    decodedToken: req.decodedToken
-  });
-});
+//   res.status(200).json({
+//     users,
+//     decodedToken: req.decodedToken
+//   });
+// });
 
-server.get("/users/me", lock, checkRole("accountant"), async (req, res) => {
-  const user = await db("users")
-    .where({ username: req.decodedToken.username })
-    .first();
+// server.get("/users/me", lock, checkRole("accountant"), async (req, res) => {
+//   const user = await db("users")
+//     .where({ username: req.decodedToken.username })
+//     .first();
 
-  res.status(200).json(user);
-});
+//   res.status(200).json(user);
+// });
 
-server.get("/users/:id", lock, async (req, res) => {
-  const user = await db("users")
-    .where({ id: req.params.id })
-    .first();
+// server.get("/users/:id", lock, async (req, res) => {
+//   const user = await db("users")
+//     .where({ id: req.params.id })
+//     .first();
 
-  res.status(200).json(user);
-});
+//   res.status(200).json(user);
+// });
 
 module.exports = server;
