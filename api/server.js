@@ -6,7 +6,7 @@ const knex = require("knex");
 const bcrypt = require("bcryptjs"); // added
 const jwt = require("jsonwebtoken");
 
-const knexConfig = require("../knexfile.js");
+const knexConfig = require("../knexfile");
 
 const server = express();
 
@@ -15,10 +15,14 @@ const db = knex(knexConfig.development);
 server.use(helmet());
 server.use(express.json());
 
+
+//basic get
 server.get("/", (req, res) => {
   res.send("sanity check");
 });
 
+
+//register(needs updating)
 server.post("/register", (req, res) => {
   const userInfo = req.body;
 
@@ -34,11 +38,12 @@ server.post("/register", (req, res) => {
     .catch(err => res.status(500).json(err));
 });
 
+
+//makes the token
 function generateToken(user) {
   const payload = {
     username: user.username,
     name: user.name,
-    roles: ["admin", "sales"] // should come from database user.roles
   };
 
   const secret = process.env.JWT_SECRET;
@@ -50,6 +55,8 @@ function generateToken(user) {
   return jwt.sign(payload, secret, options);
 }
 
+
+//login
 server.post("/login", (req, res) => {
   const creds = req.body;
 
@@ -70,6 +77,7 @@ server.post("/login", (req, res) => {
     .catch(err => res.status(500).json(err));
 });
 
+
 function lock(req, res, next) {
   // the auth token is normally sent in the Authorization header
   const token = req.headers.authorization;
@@ -88,40 +96,80 @@ function lock(req, res, next) {
   }
 }
 
-function checkRole(role) {
-  return function(req, res, next) {
-    if (req.decodedToken.roles.includes(role)) {
-      next();
-    } else {
-      res.status(403).json({ message: `you need to be an ${role}` });
-    }
-  };
-}
-
 // protect this endpoint so only logged in users can see it
-// server.get("/users", lock, checkRole("admin"), async (req, res) => {
-//   const users = await db("users").select("id", "username", "name");
+server.get("/users", lock, async (req, res) => {
+  const users = await db("users").select("id", "username", "name");
 
-//   res.status(200).json({
-//     users,
-//     decodedToken: req.decodedToken
-//   });
-// });
+  res.status(200).json({
+    users,
+    decodedToken: req.decodedToken
+  });
+});
 
-// server.get("/users/me", lock, checkRole("accountant"), async (req, res) => {
-//   const user = await db("users")
-//     .where({ username: req.decodedToken.username })
-//     .first();
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
 
-//   res.status(200).json(user);
-// });
+//tabs endpoints
+/////////////////
 
-// server.get("/users/:id", lock, async (req, res) => {
-//   const user = await db("users")
-//     .where({ id: req.params.id })
-//     .first();
 
-//   res.status(200).json(user);
-// });
+// get all tabs
+router.get("/tabs", (req, res) => {
+  projectDB
+    .get()
+    .then(projects => {
+      res.status(200).json(projects);
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ error: "projects retrival could not be performed " });
+    });
+});
+
+
+router.post("/tabs", (req, res) => {
+  const post = req.body;
+
+    projectDB
+      .insert(post)
+      .then(result => {
+        res.status(201).json(result);
+      })
+      .catch(err => {
+        res
+          .status(500)
+          .json(err)
+          // ({
+          //   error:
+          //     "Could not add new project. Provide projectID, notes, description and try again."
+          // });
+      });
+    });
+
+
+
+router.delete("/tabs/:id", (req, res) => {
+  const id = req.params.id;
+
+  if (id) {
+    projectDB
+      .remove(id)
+      .then(result => {
+        if (result !== 0) {
+          res.status(200).json({ result });
+        } else {
+          res.status(404).json({ error: "project ID does not exist" });
+        }
+      })
+      .catch(err => {
+        res
+          .status(500)
+          .json({ error: "Deleting project could not be performed, try again" });
+      });
+  } else {
+    res.status(404).json({ error: "Provide project ID for removal" });
+  }
+});
 
 module.exports = server;
