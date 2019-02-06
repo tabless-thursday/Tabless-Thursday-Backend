@@ -15,14 +15,12 @@ const db = knex(knexConfig.development);
 server.use(helmet());
 server.use(express.json());
 
-
 //basic get
 server.get("/", (req, res) => {
   res.send("sanity check");
 });
 
-
-//register(needs updating)
+//Signup(needs updating)
 server.post("/register", (req, res) => {
   const userInfo = req.body;
 
@@ -35,15 +33,15 @@ server.post("/register", (req, res) => {
     .then(ids => {
       res.status(201).json(ids);
     })
-    .catch(err => res.status(500).json(err));
+    .catch(err => 
+    res.status(500) .json(err));
 });
-
 
 //makes the token
 function generateToken(user) {
   const payload = {
     username: user.username,
-    name: user.name,
+    name: user.name
   };
 
   const secret = process.env.JWT_SECRET;
@@ -55,8 +53,7 @@ function generateToken(user) {
   return jwt.sign(payload, secret, options);
 }
 
-
-//login
+//Signin
 server.post("/login", (req, res) => {
   const creds = req.body;
 
@@ -79,7 +76,6 @@ server.post("/login", (req, res) => {
 
 
 function lock(req, res, next) {
-  // the auth token is normally sent in the Authorization header
   const token = req.headers.authorization;
 
   if (token) {
@@ -112,49 +108,42 @@ server.get("/users", lock, async (req, res) => {
 //tabs endpoints
 /////////////////
 
-
-// get all tabs
+// load usertabs
 server.get("/tabs", (req, res) => {
-    db("tabs")
-    .get()
+  db("tabs")
     .then(tabs => {
       res.status(200).json(tabs);
     })
     .catch(err => {
-      res
-        .status(500)
-        .json({ error: "tabs retrival could not be performed " });
+      res.status(500).json({ error: "tabs retrival could not be performed " });
     });
 });
 
-
+//add new tab
 server.post("/tabs", (req, res) => {
   const post = req.body;
 
-    db("tabs")
-      .insert(post)
-      .then(result => {
-        res.status(201).json(result);
-      })
-      .catch(err => {
-        res
-          .status(500)
-          .json(err)
-          // ({
-          //   error:
-          //     "Could not add new tab."
-          // });
-      });
+  db("tabs")
+    .insert(post)
+    .then(result => {
+      res.status(201).json(result);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+      // ({
+      //   error:
+      //     "Could not add new tab."
+      // });
     });
+});
 
-
-
+//delete tab
 server.delete("/tabs/:id", (req, res) => {
   const id = req.params.id;
 
   if (id) {
     db("tabs")
-      .remove(id)
+      .delete(id)
       .then(result => {
         if (result !== 0) {
           res.status(200).json({ result });
