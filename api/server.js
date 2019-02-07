@@ -31,6 +31,8 @@ server.get("/", (req, res) => {
   res.send("sanity check");
 });
 
+
+
 //Signup(needs updating)
 server.post("/register", (req, res) => {
   const userInfo = req.body;
@@ -41,20 +43,12 @@ server.post("/register", (req, res) => {
 
   db("users")
     .insert(userInfo)
-    .then(user => {
-      if (user && bcrypt.compareSync(userInfo.password, user.password)) {
-        // login is successful
-        // create the token
-        const token = generateToken(user);
-
-        res.status(200).json({ message: `welcome ${user.name}`, token });
-      } else {
-        res.status(401).json({ you: "shall not pass!!" });
-      }
-    })
-    // .catch(err => 
-    // res.status(500) .json(err));
+    .then(users => {
+			res.status(201).json(users);
+		})
+		.catch(err => res.status(500).json(err));
 });
+
 
 //makes the token
 function generateToken(user) {
