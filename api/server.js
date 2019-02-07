@@ -10,6 +10,16 @@ const knexConfig = require("../knexfile");
 
 const server = express();
 
+server.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', "*");
+  res.setHeader('Access-Control-Allow-Methods', "POST,GET,OPTIONS");
+  res.setHeader('Access-Control-Allow-Headers', "Content-Type, Authorization, X-Requested-With");
+  if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+  }
+  next();
+})
+
 const db = knex(knexConfig.development);
 
 server.use(helmet());
@@ -30,8 +40,16 @@ server.post("/register", (req, res) => {
 
   db("users")
     .insert(userInfo)
-    .then(ids => {
-      res.status(201).json(ids);
+    .then(user => {
+      if (user && bcrypt.compareSync(creds.password, user.password)) {
+        // login is successful
+        // create the token
+        const token = generateToken(user);
+
+        res.status(200).json({ message: `welcome ${user.name}`, token });
+      } else {
+        res.status(401).json({ you: "shall not pass!!" });
+      }
     })
     .catch(err => 
     res.status(500) .json(err));
@@ -117,6 +135,45 @@ server.get("/tabs", (req, res) => {
     .catch(err => {
       res.status(500).json({ error: "tabs retrival could not be performed " });
     });
+});
+
+// get tab by id
+server.get("/tabs/:id", (req, res) => {
+  const id = req.params.id;
+
+  // db("tabs")
+  //   // .get(id)
+  //   .then(tabs => {
+  //     if (tabs) {
+  //       res.status(200).json({ tabs });
+  //     } else {
+  //       res
+  //         .status(404)
+  //         .json({ error: "Specified tab ID could not be found" });
+  //     }
+  //   })
+  //   .catch(err => {
+  //     res.status(404).json({ error: "Error showing that tab" });
+  //   });
+
+  if (id) {
+    db("tabs")
+      .where({"id":id})
+      .then(tabs => {
+        if (tabs !== 0) {
+          res.status(200).json({ tabs });
+        } else {
+          res.status(404).json({ error: "tab ID does not exist" });
+        }
+      })
+      .catch(err => {
+        res
+          .status(500)
+          .json({ error: "couldnt get tab. try again" });
+      });
+  } else {
+    res.status(404).json({ error: "Provide tab ID" });
+  }
 });
 
 //add new tab

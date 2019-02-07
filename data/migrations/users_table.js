@@ -17,7 +17,7 @@ exports.up = function(knex, Promise) {
 
     tbl.string("password", 255).notNullable();
 
-    tbl.string("phoneNumber", 255).notNullable();
+    tbl.string("phone", 255).notNullable();
   });
 };
 

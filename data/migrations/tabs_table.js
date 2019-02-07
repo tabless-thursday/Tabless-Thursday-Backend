@@ -5,7 +5,7 @@ exports.up = function(knex, Promise) {
 
     tbl.string("url", 500).notNullable();
 
-    tbl.string("Title", 255).notNullable();
+    tbl.string("category", 255).notNullable();
 
     tbl.string("importance", 255);
 
