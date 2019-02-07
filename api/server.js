@@ -10,9 +10,12 @@ const knexConfig = require("../knexfile");
 
 const server = express();
 
+server.use(helmet());
+server.use(express.json());
+
 server.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', "*");
-  res.setHeader('Access-Control-Allow-Methods', "POST,GET,OPTIONS");
+  res.setHeader('Access-Control-Allow-Methods', "POST,GET,OPTIONS,PUT");
   res.setHeader('Access-Control-Allow-Headers', "Content-Type, Authorization, X-Requested-With");
   if (req.method === "OPTIONS") {
       return res.sendStatus(200);
@@ -22,8 +25,6 @@ server.use((req, res, next) => {
 
 const db = knex(knexConfig.development);
 
-server.use(helmet());
-server.use(express.json());
 
 //basic get
 server.get("/", (req, res) => {
@@ -41,7 +42,7 @@ server.post("/register", (req, res) => {
   db("users")
     .insert(userInfo)
     .then(user => {
-      if (user && bcrypt.compareSync(creds.password, user.password)) {
+      if (user && bcrypt.compareSync(userInfo.password, user.password)) {
         // login is successful
         // create the token
         const token = generateToken(user);
@@ -51,8 +52,8 @@ server.post("/register", (req, res) => {
         res.status(401).json({ you: "shall not pass!!" });
       }
     })
-    .catch(err => 
-    res.status(500) .json(err));
+    // .catch(err => 
+    // res.status(500) .json(err));
 });
 
 //makes the token
