@@ -4,7 +4,6 @@ exports.up = function(knex, Promise) {
 
 	tbl
       .string("name", 255)
-      .notNullable()
     tbl
       .string("username", 255)
       .notNullable()
